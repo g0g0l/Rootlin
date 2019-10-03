@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Rootlin</string>
+    <string name="action_delete_all">Delete all</string>
+</resources>
