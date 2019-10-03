@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:hint="Enter note"
+        android:hint="@string/enter_note"
         android:maxLines="5"
         android:textSize="18sp" />
 
@@ -20,6 +20,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@color/colorPrimary"
-        android:text="Save" />
+        android:text="@string/save" />
 
 </LinearLayout>
