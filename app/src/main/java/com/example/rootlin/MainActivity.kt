@@ -5,15 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
+import com.example.rootlin.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
 
     companion object {
         const val NEW_NOTE_ACTIVITY_REQUEST_CODE = 10
@@ -30,19 +34,20 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var noteViewModel: NoteViewModel
 
-    //Actual works starts here
+    //Actual works start here
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
 
 
         val adapter = NoteListAdapter(this, object : RvCallback {
             override fun onEdit(noteEntity: NoteEntity) {
                 val intent = Intent(this@MainActivity, NewNoteActivity::class.java)
                 intent.putExtra(EXTRA_EDIT, noteEntity)
-                startActivityForResult(intent, EDIT_NOTE_ACTIVITY_REQUEST_CODE)
+                editNoteResultLauncher.launch(intent)
             }
 
             override fun onDelete(noteEntity: NoteEntity) {
@@ -50,8 +55,8 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
-        noteList.adapter = adapter
-        noteList.layoutManager = LinearLayoutManager(this)
+        binding.contentMain.noteList.adapter = adapter
+        binding.contentMain.noteList.layoutManager = LinearLayoutManager(this)
 
         noteViewModel = ViewModelProviders.of(this).get(NoteViewModel::class.java)
 
@@ -62,11 +67,8 @@ class MainActivity : AppCompatActivity() {
             })
 
 
-        fab.setOnClickListener {
-            startActivityForResult(
-                Intent(this, NewNoteActivity::class.java),
-                NEW_NOTE_ACTIVITY_REQUEST_CODE
-            )
+        binding.fab.setOnClickListener {
+            newNoteResultLauncher.launch(Intent(this, NewNoteActivity::class.java))
         }
     }
 
@@ -85,25 +87,29 @@ class MainActivity : AppCompatActivity() {
                 noteViewModel.deleteAll()
                 return true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
+    var newNoteResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         //Serial should always be 0 for insert because it's set auto increment
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == NEW_NOTE_ACTIVITY_REQUEST_CODE) {
+        if (result.resultCode == Activity.RESULT_OK) {
+
                 noteViewModel.insert(
-                    NoteEntity(0, data!!.getStringExtra(EXTRA_REPLY_TEXT)!!)
+                    NoteEntity(0, result.data!!.getStringExtra(EXTRA_REPLY_TEXT)!!)
                 )
-            } else if (requestCode == EDIT_NOTE_ACTIVITY_REQUEST_CODE) {
+        } else {
+            Toast.makeText(this, "Mission aborted", Toast.LENGTH_LONG).show()
+        }
+    }
+    var editNoteResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        //Serial should always be 0 for insert because it's set auto increment
+        if (result.resultCode == Activity.RESULT_OK) {
                 noteViewModel.edit(
-                    data!!.getLongExtra(EXTRA_REPLY_SERIAL, 0),
-                    data!!.getStringExtra(EXTRA_REPLY_TEXT)!!
+                    result.data!!.getLongExtra(EXTRA_REPLY_SERIAL, 0),
+                    result.data!!.getStringExtra(EXTRA_REPLY_TEXT)!!
                 )
-            }
         } else {
             Toast.makeText(this, "Mission aborted", Toast.LENGTH_LONG).show()
         }
