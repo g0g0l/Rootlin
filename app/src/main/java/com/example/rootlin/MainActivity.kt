@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.rootlin.databinding.ActivityMainBinding
-import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
@@ -87,12 +85,16 @@ class MainActivity : AppCompatActivity() {
                 noteViewModel.deleteAll()
                 return true
             }
+            R.id.action_about -> {
+               startActivity(Intent(this,AboutActivity::class.java))
+                return true
+            }
 
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    var newNoteResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private var newNoteResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         //Serial should always be 0 for insert because it's set auto increment
         if (result.resultCode == Activity.RESULT_OK) {
 
