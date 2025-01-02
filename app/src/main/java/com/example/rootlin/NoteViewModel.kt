@@ -1,11 +1,11 @@
 package com.example.rootlin
 
 import android.app.Application
-import android.os.AsyncTask
-
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -23,69 +23,36 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     internal fun insert(noteEntity: NoteEntity) {
-        InsertAsyncTask(noteDao, noteEntity).execute()
+        insertCoroutine(noteEntity)
     }
 
     internal fun edit(serial: Long, newText: String) {
-        EditAsyncTask(noteDao, serial, newText).execute()
+        editCoroutine(serial, newText)
     }
 
     internal fun delete(noteEntity: NoteEntity) {
-        DeleteAsyncTask(noteDao, noteEntity).execute()
+        deleteCoroutine(noteEntity)
     }
 
     internal fun deleteAll() {
-        DeleteAllAsyncTask(noteDao).execute()
+        deleteAllCoroutine()
     }
 
+    //----------------------Coroutines start----------------------------//
 
-    //----------------------AsyncTasks start----------------------------//
-
-    private class InsertAsyncTask internal constructor(
-        private val mAsyncTaskDao: NoteDao,
-        private val noteEntity: NoteEntity
-    ) :
-        AsyncTask<Void, Void, Void>() {
-
-        override fun doInBackground(vararg params: Void): Void? {
-            val lastInsertId = mAsyncTaskDao.insert(noteEntity)
-            return null
-        }
+    private fun insertCoroutine(noteEntity: NoteEntity) = viewModelScope.launch(Dispatchers.IO) {
+        noteDao.insert(noteEntity)
     }
 
-    private class EditAsyncTask internal constructor(
-        private val mAsyncTaskDao: NoteDao,
-        private val serial: Long,
-        private val newText: String
-    ) :
-        AsyncTask<Void, Void, Void>() {
-
-        override fun doInBackground(vararg params: Void): Void? {
-            mAsyncTaskDao.edit(serial, newText)
-            return null
-        }
+    private fun editCoroutine(serial: Long, newText: String) = viewModelScope.launch(Dispatchers.IO) {
+        noteDao.edit(serial, newText)
     }
 
-    private class DeleteAsyncTask internal constructor(
-        private val mAsyncTaskDao: NoteDao,
-        private val noteEntity: NoteEntity
-    ) :
-        AsyncTask<Void, Void, Void>() {
-
-        override fun doInBackground(vararg params: Void): Void? {
-            mAsyncTaskDao.delete(noteEntity)
-            return null
-        }
+    private fun deleteCoroutine(noteEntity: NoteEntity) = viewModelScope.launch(Dispatchers.IO) {
+        noteDao.delete(noteEntity)
     }
 
-    private class DeleteAllAsyncTask internal constructor(
-        private val mAsyncTaskDao: NoteDao
-    ) :
-        AsyncTask<Void, Void, Void>() {
-
-        override fun doInBackground(vararg params: Void): Void? {
-            mAsyncTaskDao.deleteAll()
-            return null
-        }
+    private fun deleteAllCoroutine() = viewModelScope.launch(Dispatchers.IO) {
+        noteDao.deleteAll()
     }
 }

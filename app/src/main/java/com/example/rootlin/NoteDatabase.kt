@@ -1,11 +1,13 @@
 package com.example.rootlin
 
 import android.content.Context
-import android.os.AsyncTask
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Database(entities = [NoteEntity::class], version = 1)
 abstract class NoteDatabase : RoomDatabase() {
@@ -46,23 +48,20 @@ abstract class NoteDatabase : RoomDatabase() {
 
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                PopulateDbAsync(INSTANCE!!).execute()
+                populateDatabase(INSTANCE!!)
+                //PopulateDbAsync(INSTANCE!!).execute()
             }
         }
 
-        private class PopulateDbAsync internal constructor(db: NoteDatabase) :
-            AsyncTask<Void, Void, Void>() {
+        private fun populateDatabase(db: NoteDatabase) {
+            runBlocking {
+                launch(Dispatchers.IO) {
+                    val mDao: NoteDao = db.noteDao()
+                    mDao.deleteAll()
 
-            private val mDao: NoteDao = db.noteDao()
-
-            override fun doInBackground(vararg params: Void): Void? {
-                // Start the app with a clean database every time.
-                // Not needed if you only populate on creation.
-                mDao.deleteAll()
-
-                val noteEntity = NoteEntity(0,"Bibaswann is a great programmer/genius")
-                mDao.insert(noteEntity)
-                return null
+                    val noteEntity = NoteEntity(0,"Bibaswann is a great programmer/genius")
+                    mDao.insert(noteEntity)
+                }
             }
         }
     }

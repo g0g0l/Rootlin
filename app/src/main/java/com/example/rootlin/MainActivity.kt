@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.rootlin.databinding.ActivityMainBinding
@@ -56,13 +55,12 @@ class MainActivity : AppCompatActivity() {
         binding.contentMain.noteList.adapter = adapter
         binding.contentMain.noteList.layoutManager = LinearLayoutManager(this)
 
-        noteViewModel = ViewModelProviders.of(this).get(NoteViewModel::class.java)
+        noteViewModel = ViewModelProviders.of(this)[NoteViewModel::class.java]
 
-        noteViewModel.allNotes.observe(this,
-            Observer<List<NoteEntity>> { notes ->
-                // Update the cached copy of the notes in the adapter.
-                adapter.setNotes(notes)
-            })
+        noteViewModel.allNotes.observe(this) { notes ->
+            // Update the cached copy of the notes in the adapter.
+            adapter.setNotes(notes)
+        }
 
 
         binding.fab.setOnClickListener {
