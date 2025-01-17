@@ -17,8 +17,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     companion object {
-        const val NEW_NOTE_ACTIVITY_REQUEST_CODE = 10
-        const val EDIT_NOTE_ACTIVITY_REQUEST_CODE = 20
         const val EXTRA_REPLY_TEXT = "reply_text"
         const val EXTRA_REPLY_SERIAL = "reply_serial"
         const val EXTRA_EDIT = "edit"
